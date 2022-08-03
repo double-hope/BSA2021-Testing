@@ -9,6 +9,14 @@ beforeEach(() => {
 
 describe('CartParser - unit tests', () => {
 
+	test('should return ColumnType from constructor', () => {
+		const parse = new CartParser();
+		expect(parse.ColumnType).toEqual({
+			STRING: 'string',
+			NUMBER_POSITIVE: 'numberPositive'
+		});
+	});
+
 	test('should throw header error', () => {
 		expect(parser.validate(parser.readFile('D:\\Courses\\Academy 2022\\Lessons\\BSA2021-Testing\\samples.test\\cart-header-error.csv')))
 			.toEqual([{"column": 0, "message": "Expected header to be named \"Product name\" but received Product nam.", "row": 0, "type": "header"}]);
@@ -48,8 +56,8 @@ describe('CartParser - unit tests', () => {
 
 	test('should return total price', () => {
 		const obj = [{
-			price: 2,
-			quantity: 1,
+				price: 2,
+				quantity: 1,
 			},
 			{
 				price: 3,
@@ -58,22 +66,31 @@ describe('CartParser - unit tests', () => {
 		expect(parser.calcTotal(obj)).toEqual(8);
 	});
 
+	test('should not go to parseLine function', () => {
+		const error = {
+			type: 'error',
+			row: 4,
+			column: 1,
+			message: 'Test error'
+		}
+		expect(parser.createError(error.type, error.row, error.column, error.message))
+			.toEqual({ "type": "error", "row": 4, "column": 1, "message": "Test error"});
+	});
+
+	test('should not go to parseLine function', () => {
+		parser.parseLine = jest.fn();
+		expect(() => parser.parse('D:\\Courses\\Academy 2022\\Lessons\\BSA2021-Testing\\samples.test\\cart-error.csv'))
+			.toThrow('Validation failed!');
+		expect(parser.parseLine).not.toBeCalled();
+	});
+
+});
+
+describe('CartParser - integration test', () => {
 	test('should return right parsed object', () => {
 		const res = require('../samples.test/cart-test.json');
 
 		expect(parser.parse('D:\\Courses\\Academy 2022\\Lessons\\BSA2021-Testing\\samples.test\\cart-test.csv'))
 			.toMatchObject(res);
 	});
-
-	test('should return ColumnType from constructor', () => {
-		const parse = new CartParser();
-		expect(parse.ColumnType).toEqual({
-			STRING: 'string',
-			NUMBER_POSITIVE: 'numberPositive'
-		});
-	});
-});
-
-describe('CartParser - integration test', () => {
-	// Add your integration test here.
 });
