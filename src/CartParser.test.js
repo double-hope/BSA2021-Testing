@@ -4,6 +4,7 @@ let parser;
 
 beforeEach(() => {
 	parser = new CartParser();
+	console.error = jest.fn();
 });
 
 describe('CartParser - unit tests', () => {
@@ -29,10 +30,48 @@ describe('CartParser - unit tests', () => {
 	});
 
 	test('should throw validation failed error', () => {
-		expect(parser.validate(parser.parse('D:\\Courses\\Academy 2022\\Lessons\\BSA2021-Testing\\samples.test\\cart-header-error.csv')))
+		expect(() => parser.parse('D:\\Courses\\Academy 2022\\Lessons\\BSA2021-Testing\\samples.test\\cart-error.csv'))
 			.toThrow('Validation failed!');
 	});
 
+	test('should return object', () => {
+		const expected = {
+			"name": "Mollis consequat",
+			"price": 9,
+			"quantity": 2,
+		}
+
+		const result = parser.parseLine('Mollis consequat,9.00,2');
+		expect(result).toMatchObject(expected);
+
+	});
+
+	test('should return total price', () => {
+		const obj = [{
+			price: 2,
+			quantity: 1,
+			},
+			{
+				price: 3,
+				quantity: 2,
+			}]
+		expect(parser.calcTotal(obj)).toEqual(8);
+	});
+
+	test('should return right parsed object', () => {
+		const res = require('../samples.test/cart-test.json');
+
+		expect(parser.parse('D:\\Courses\\Academy 2022\\Lessons\\BSA2021-Testing\\samples.test\\cart-test.csv'))
+			.toMatchObject(res);
+	});
+
+	test('should return ColumnType from constructor', () => {
+		const parse = new CartParser();
+		expect(parse.ColumnType).toEqual({
+			STRING: 'string',
+			NUMBER_POSITIVE: 'numberPositive'
+		});
+	});
 });
 
 describe('CartParser - integration test', () => {
